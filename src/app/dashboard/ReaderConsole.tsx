@@ -1,5 +1,4 @@
 'use client'
-import './reader.css'
 import { useState } from 'react'
 import { Check, Save, X } from 'lucide-react'
 import { useRouter } from 'next/navigation'
