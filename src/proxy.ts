@@ -3,11 +3,22 @@ import { NextResponse, type NextRequest } from 'next/server'
 
 export async function proxy(request: NextRequest) {
   let response = NextResponse.next({ request })
+
+  const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL
+  const supabaseKey = process.env.NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY
+
+  // Keep the public site available when Supabase credentials have not been
+  // configured yet. Authenticated features will start working once the
+  // publishable credentials are added to the deployment environment.
+  if (!supabaseUrl || !supabaseKey || supabaseKey === 'your_supabase_publishable_key') {
+    return response
+  }
+
   const supabase = createServerClient(
-    process.env.NEXT_PUBLIC_SUPABASE_URL!,
-    process.env.NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY!,
+    supabaseUrl,
+    supabaseKey,
     { cookies: { getAll: () => request.cookies.getAll(), setAll: (items) => {
-      items.forEach(({ name, value, options }) => request.cookies.set(name, value))
+      items.forEach(({ name, value }) => request.cookies.set(name, value))
       response = NextResponse.next({ request })
       items.forEach(({ name, value, options }) => response.cookies.set(name, value, options))
     } } },
